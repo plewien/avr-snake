@@ -34,7 +34,7 @@ extern direction_t direction;
  * would be to save each pixel as a node. As shown by the example, this method saves memory 
  * space, since the amount of memory used is agnostic of the length of each snake segment.
  *
- * Example:
+ * Example: 
  *
  *		*********************************************
  *		*											*
