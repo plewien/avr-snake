@@ -1,4 +1,5 @@
 # ignore everything in the compile folder.
-    default/
+default/
+
 # ignore objects and archives, anywhere in the tree.
-    *.[oa]
+*.[oa]
