@@ -1,2 +1,2 @@
 # AVR Snake
- A little embedded game console which runs the classic game SNAKE.
+ A little embedded game console project on an ATMEGA16 which runs the classic game SNAKE.
