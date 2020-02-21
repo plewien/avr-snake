@@ -1,4 +1,4 @@
-# ignore everything in the build folder.
-    build/
+# ignore everything in the compile folder.
+    default/
 # ignore objects and archives, anywhere in the tree.
     *.[oa]
