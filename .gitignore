@@ -1,2 +1,4 @@
+# ignore everything in the build folder.
+    build/
 # ignore objects and archives, anywhere in the tree.
     *.[oa]
