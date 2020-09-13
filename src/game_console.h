@@ -13,7 +13,7 @@ DESCRIPTION:
 #ifndef _GAME_CONSOLE_H_
 #define _GAME_CONSOLE_H_
 
-#include <avr/io.h> 
+#include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
