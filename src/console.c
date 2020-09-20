@@ -19,7 +19,7 @@ DESCRIPTION:
 *************************************************************************/
 
 
-#include "game_console.h"
+#include "console.h"
 #include "snake.h"
 
 

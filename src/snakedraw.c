@@ -9,10 +9,18 @@ DESCRIPTION:
 
 *************************************************************************/
 
-#include "game_console.h"
+#include "console.h"
 #include "snake.h"
 
-extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
+extern obj_t walls[MAX_SNAKE_COLUMN][MAX_SNAKE_ROW];
+
+
+void update_display_buffer(point_t pt, obj_t object) {
+	byte col = pt.x % MAX_SNAKE_COLUMN;
+	byte row = pt.y % MAX_SNAKE_ROW;
+	walls[col][row] = object;
+	return;
+}
 
 /*
  * Function:  write_pixel
@@ -26,26 +34,44 @@ extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
  *  returns: True.
  *
  */
-byte write_pixel(point_t pt, byte value) {
+byte write_display(point_t pt) {
+	byte col = pt.x % MAX_SNAKE_COLUMN;
+	byte row = pt.y % MAX_SNAKE_ROW;
+	byte i, j, mask, pixel_data[SNAKE_WIDTH];
+	obj_t wall_data[2];
 
-	//Update wall frame buffer
-	byte snake_column = pt.x;
-	byte snake_page = (pt.y)/PIXEL_PER_PAGE;
-	byte snake_pixel = (pt.y)%PIXEL_PER_PAGE;
-	SET(walls[snake_column][snake_page], _BV(snake_pixel), value);
-	
-	// Convert wall data into pixel data
-	byte pixel_data = walls[snake_column][snake_page];
-	pixel_data = get2bits(pixel_data, snake_pixel);
-	pixel_data = interleave2(pixel_data);
+	if (row%2 == 1) {
+		wall_data[0] = walls[col][row-1];
+		wall_data[1] = walls[col][row];
+	} else {
+		wall_data[0] = walls[col][row];
+		wall_data[1] = walls[col][row+1];
+	}
+
+	for (i=0; i<2; i++) {
+		mask = ((i%2==0) ? 0x0F: 0xF0);
+		for (j=0; j<SNAKE_WIDTH; j++) {
+			switch (wall_data[i]) {
+				case EMPTY:
+					SET(pixel_data[j], mask, OFF);
+					break;
+				case WALL:
+					SET(pixel_data[j], mask, ON);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
 
 	//Select pixel locations and draw
-	byte i, left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
-	byte page = (SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE;
+	byte left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
+	byte page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
 	select_page(page);
 	for (i=0; i < SNAKE_WIDTH; i++) {
 		select_column(left_column+i);
-		LCD_data_tx(pixel_data);
+		LCD_data_tx(pixel_data[i]);
 	}
 	return(TRUE);
 }
@@ -58,8 +84,9 @@ byte write_pixel(point_t pt, byte value) {
  *  s_pos: The position on the snake grid.
  *
  */
-void draw(point_t s_pos) {
-	write_pixel(s_pos, ON);
+void draw(point_t pt) {
+	update_display_buffer(pt, WALL);
+	write_display(pt);
 }
 
 
@@ -71,8 +98,9 @@ void draw(point_t s_pos) {
  *  s_pos: The position on the snake grid..
  *
  */
-void clear(point_t s_pos) {
-	write_pixel(s_pos, OFF);
+void clear(point_t pt) {
+	update_display_buffer(pt, EMPTY);
+	write_display(pt);
 }
 
 
@@ -185,3 +213,28 @@ void redraw_all_walls(void) {
 	}
 	return;
 }
+
+
+void draw_minimap(void) {
+	uint8_t elem, row, page, column;
+	byte pixel_data = 0x00;
+	for (column=0; column<MAX_SNAKE_COLUMN; column++) {
+		for (row=0; row<MAX_SNAKE_ROW; row++) {
+			elem = row%PIXEL_PER_PAGE;
+			if (walls[column][row] != EMPTY) {
+				SET(pixel_data, _BV(elem), ON);
+			} else {
+				SET(pixel_data, _BV(elem), OFF);
+			}
+			if (elem == 7) {
+				page = row/PIXEL_PER_PAGE;
+				select_page(page);
+				select_column(column);
+				LCD_data_tx(pixel_data);
+				pixel_data = 0x00;
+			}
+		}
+	}
+	return;
+}
+

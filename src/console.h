@@ -165,8 +165,6 @@ void LCD_clear();
 #define MAX_PAGE			8
 #define MAX_COLUMN			102
 #define MAX_ROW				MAX_PAGE*PIXEL_PER_PAGE
-#define DEFAULT_COLUMN		51
-#define DEFAULT_ROW			32
 
 //Interrupt Interface
 #define ENABLE_INT1							GICR|=_BV(INT1)

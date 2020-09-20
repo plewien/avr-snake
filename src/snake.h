@@ -20,7 +20,9 @@ typedef struct {
 	byte y;
 } point_t;
 
-typedef enum direction_t {UP,DOWN,LEFT,RIGHT} direction_t;
+typedef enum {UP,DOWN,LEFT,RIGHT} direction_t;
+
+typedef enum {EMPTY,WALL,FOOD,SPECIAL} obj_t;
 
 typedef struct node node_t;
 struct node {
@@ -65,7 +67,8 @@ point_t 	generate_random_location(void);
 point_t		check_food_collision(snake_t* snake, point_t food);
 
 // Drawing function declarations
-byte 		write_pixel(point_t pt, byte value);
+void 		update_display_buffer(point_t pt, obj_t object);
+byte 		write_display(point_t pt);
 void 		draw(point_t s_pos);
 void		draw_food(point_t pt);
 void 		clear(point_t s_pos);
@@ -73,15 +76,16 @@ byte 		get2bits(byte data, byte pixel);
 byte 		interleave(byte x);
 byte 		interleave2(byte x);
 void 		redraw_all_walls(void);
+void 		draw_minimap(void);
 
 
 //Snake Interface
 #define SPEED 				200 //ms
 #define SNAKE_WIDTH			4
+#define TEXT_HEIGHT			8
 #define MAX_SNAKE_COLUMN 	MAX_COLUMN/SNAKE_WIDTH
-
-#define MAX_SNAKE_PAGE		(MAX_PAGE-1)/SNAKE_WIDTH
-#define MAX_SNAKE_ROW		MAX_SNAKE_PAGE*PIXEL_PER_PAGE
+#define MAX_SNAKE_ROW		MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
+#define MAX_SNAKE_PAGE		MAX_PAGE  // -1 allows space for score text
 #define MAX_SEED			MAX_SNAKE_COLUMN*MAX_SNAKE_ROW
 
 #define START_X				MAX_SNAKE_COLUMN/2

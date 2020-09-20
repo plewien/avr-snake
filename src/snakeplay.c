@@ -16,10 +16,10 @@ DESCRIPTION:
 
 *************************************************************************/
 
-#include "game_console.h"
+#include "console.h"
 #include "snake.h"
 
-volatile byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ OFF }};
+volatile obj_t walls[MAX_SNAKE_COLUMN][MAX_SNAKE_ROW] = {{ EMPTY }};
 extern direction_t direction;
 
 /*
@@ -59,15 +59,15 @@ void play_snake_game() {
 	
 	while (TRUE) {
 		head = add_to_head(snake, direction); 
-		food = check_food_collision(snake, food);
-		check_wall_collision(snake);
+		// food = check_food_collision(snake, food);
+		// check_wall_collision(snake);
 		draw(head);  // Only draw head once the collision has been checked
 
 		while (snake->length >= snake->max_length) {
 			tail = remove_from_tail(snake);
 			clear(tail);
 		}
-		
+
 		_delay_ms(SPEED); // Pause before drawing next pixel
 	}
 }
@@ -117,12 +117,9 @@ void reset_snake_game(snake_t* snake) {
 byte is_wall(point_t pt) {
 	
 	// TODO: Check if the wall is actually a food?
-
-	byte column = pt.x;
-	byte page = (pt.y)/PIXEL_PER_PAGE;
-	byte bit = (pt.y)%PIXEL_PER_PAGE;
+	// TODO: Return false if out of bounds
 	
-	return GET(walls[column][page], _BV(bit));
+	return walls[pt.x][pt.y] == WALL;
 }
 
 
