@@ -19,7 +19,7 @@ DESCRIPTION:
 #include "console.h"
 #include "snake.h"
 
-volatile obj_t walls[MAX_SNAKE_COLUMN][MAX_SNAKE_ROW] = {{ EMPTY }};
+volatile obj_t walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ EMPTY }};
 extern direction_t direction;
 
 /*
@@ -67,9 +67,10 @@ void play_snake_game() {
 			tail = remove_from_tail(snake);
 			clear(tail);
 		}
-
+		//draw_minimap();
 		_delay_ms(SPEED); // Pause before drawing next pixel
 	}
+	
 }
 
 

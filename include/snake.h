@@ -83,8 +83,8 @@ void 		draw_minimap(void);
 #define SPEED 				200 //ms
 #define SNAKE_WIDTH			4
 #define TEXT_HEIGHT			8
-#define MAX_SNAKE_COLUMN 	MAX_COLUMN/SNAKE_WIDTH
-#define MAX_SNAKE_ROW		MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
+#define MAX_SNAKE_COLUMN 	8 //MAX_COLUMN/SNAKE_WIDTH
+#define MAX_SNAKE_ROW		8  //MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
 #define MAX_SNAKE_PAGE		MAX_PAGE  // -1 allows space for score text
 #define MAX_SEED			MAX_SNAKE_COLUMN*MAX_SNAKE_ROW
 
