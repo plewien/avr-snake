@@ -1,4 +1,4 @@
-/*************************************************************************
+	/*************************************************************************
 Title: Snake
 Author: Patrick Lewien (694555)
 Software: AVR-GCC 
@@ -12,10 +12,10 @@ DESCRIPTION:
 
 *************************************************************************/
 
-#include "game_console.h"
+#include "console.h"
 #include "snake.h"
 
-
+	
 /*
  * Function:  create_snake
  * -----------------------
@@ -252,4 +252,5 @@ point_t move_pos(point_t pos, direction_t dir, byte dist) {
 	return pos;
 }
 
-
+
+
