@@ -22,7 +22,7 @@ typedef struct {
 
 typedef enum {UP,DOWN,LEFT,RIGHT} direction_t;
 
-typedef enum {EMPTY,WALL,FOOD,SPECIAL} obj_t;
+typedef enum {EMPTY=0b00,WALL=0b01,FOOD=0b10,SPECIAL=0b11} obj_t;
 
 typedef struct node node_t;
 struct node {
@@ -75,7 +75,7 @@ void 		clear(point_t s_pos);
 byte 		get2bits(byte data, byte pixel);
 byte 		interleave(byte x);
 byte 		interleave2(byte x);
-void 		redraw_all_walls(void);
+void 		draw_all_walls(void);
 void 		draw_minimap(void);
 
 
@@ -83,13 +83,15 @@ void 		draw_minimap(void);
 #define SPEED 				200 //ms
 #define SNAKE_WIDTH			4
 #define TEXT_HEIGHT			8
-#define MAX_SNAKE_COLUMN 	8 //MAX_COLUMN/SNAKE_WIDTH
-#define MAX_SNAKE_ROW		8  //MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
-#define MAX_SNAKE_PAGE		MAX_PAGE  // -1 allows space for score text
-#define MAX_SEED			MAX_SNAKE_COLUMN*MAX_SNAKE_ROW
+#define MAX_SNAKE_COLUMN 	8//MAX_COLUMN/SNAKE_WIDTH
+#define MAX_SNAKE_ROW		8// MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
+#define SNAKE_ROWS_PER_PAGE	4  // Used to store multiple walls per byte in memory
+#define SNAKE_ROW_BIT_SIZE	2 //(BIT_PER_BYTE/SNAKE_ROWS_PER_PAGE)
+#define MAX_SNAKE_PAGE		2 // (MAX_SNAKE_ROW/SNAKE_ROWS_PER_PAGE)
+#define MAX_SEED			(MAX_SNAKE_COLUMN*MAX_SNAKE_ROW)
 
-#define START_X				MAX_SNAKE_COLUMN/2
-#define START_Y				MAX_SNAKE_ROW/2
+#define START_X				(MAX_SNAKE_COLUMN/2)
+#define START_Y				(MAX_SNAKE_ROW/2)
 #define START_LENGTH		5
 #define LENGTH_DELTA		5
 

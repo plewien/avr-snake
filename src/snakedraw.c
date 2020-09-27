@@ -12,13 +12,15 @@ DESCRIPTION:
 #include "console.h"
 #include "snake.h"
 
-extern obj_t walls[MAX_SNAKE_COLUMN][MAX_SNAKE_ROW];
-
+extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
 
 void update_display_buffer(point_t pt, obj_t object) {
 	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte row = pt.y % MAX_SNAKE_ROW;
-	walls[col][row] = object;
+	byte page = (pt.y / SNAKE_ROWS_PER_PAGE);
+	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
+	byte mask = _BV(bit_start) | _BV(bit_start+1);
+	byte msg = (object&0b11) << bit_start;
+	SET(walls[col][page], mask, msg);		
 	return;
 }
 
@@ -36,42 +38,52 @@ void update_display_buffer(point_t pt, obj_t object) {
  */
 byte write_display(point_t pt) {
 	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte row = pt.y % MAX_SNAKE_ROW;
-	byte i, j, mask, pixel_data[SNAKE_WIDTH];
-	obj_t wall_data[2];
-
-	if (row%2 == 1) {
-		wall_data[0] = walls[col][row-1];
-		wall_data[1] = walls[col][row];
+	byte snake_page = (pt.y / SNAKE_ROWS_PER_PAGE);
+	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
+	
+	// select applicable wall data
+	byte wall_data, data = walls[col][snake_page];
+	if (bit_start < 4) {
+		wall_data = GET(0x0F, data);
 	} else {
-		wall_data[0] = walls[col][row];
-		wall_data[1] = walls[col][row+1];
+		wall_data = (GET(0xF0, data) >> 4);
 	}
+	
 
+	// transcribe to pixel data
+	byte i, j, shift, pixel_data = 0x00;
+	byte wall_mask = 0b11, pixel_mask = 0x0F;
 	for (i=0; i<2; i++) {
-		mask = ((i%2==0) ? 0x0F: 0xF0);
-		for (j=0; j<SNAKE_WIDTH; j++) {
-			switch (wall_data[i]) {
+		shift = i*SNAKE_ROW_BIT_SIZE;
+		wall_mask <<= i*SNAKE_ROW_BIT_SIZE;
+		pixel_mask <<= i*SNAKE_WIDTH;
+		if ((GET(wall_data, wall_mask) >> shift) == 0) {
+			SET(pixel_data, pixel_mask, OFF);
+		} else {
+			SET(pixel_data, pixel_mask, ON);
+		}
+		/*for (j=0; j<SNAKE_WIDTH; j++) {
+			switch (GET(wall_data, wall_mask)) {
 				case EMPTY:
-					SET(pixel_data[j], mask, OFF);
+					SET(pixel_data[j], pixel_mask, OFF);
 					break;
 				case WALL:
-					SET(pixel_data[j], mask, ON);
+					SET(pixel_data[j], pixel_mask, ON);
 					break;
 				default:
 					break;
 			}
-		}
+		}*/
 	}
 
 
 	//Select pixel locations and draw
-	byte left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
+	byte left_column = 12+(SNAKE_WIDTH*pt.x)%MAX_COLUMN;
 	byte page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
 	select_page(page);
 	for (i=0; i < SNAKE_WIDTH; i++) {
 		select_column(left_column+i);
-		LCD_data_tx(pixel_data[i]);
+		LCD_data_tx(pixel_data);
 	}
 	return(TRUE);
 }
@@ -201,7 +213,7 @@ byte interleave2(byte value) {
  * 'mini-map' in the top-left corner of the screen.
  *
  */
-void redraw_all_walls(void) {
+void draw_all_walls(void) {
 	uint8_t page;
 	uint8_t column;
 	for (page = 0; page<MAX_SNAKE_PAGE; page++) {
