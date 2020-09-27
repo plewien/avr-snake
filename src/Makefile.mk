@@ -14,7 +14,7 @@ BDIR = ../build
 ODIR = $(BDIR)/obj
 DDIR = $(ODIR)/dep
 IDIR = ../include
-TARGET = $(BDIR)/$(PROJECT).elf
+TARGET = $(PROJECT).elf   # elf target must go in same folder as makefile
 
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
@@ -34,8 +34,8 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
+# LDFLAGS += -Wl,--print-memory-usage   # Not supported with this version of win-avr
 # LDFLAGS += -Wl,-Map=SnakeProject.map
-LDFLAGS += --print-memory-usage
 
 ## Intel Hex file production flags
 HEX_FLASH_FLAGS = -R .eeprom -R .fuse -R .lock -R .signature
@@ -76,32 +76,32 @@ lss: $(BDIR)/$(PROJECT).lss
 	
 ## Compile
 $(ODIR)/%.o: %.c $(INCLUDE) | $(ODIR)
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(ODIR):
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	mkdir -p $(ODIR)
 
 ##Link
 $(TARGET): $(OBJECTS)
-	@echo "---- LINKING ----"
+	@echo ---- LINKING ----
 	$(CC) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
 
 $(BDIR)/%.hex: $(TARGET) | $(BDIR)
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	avr-objcopy $(HEX_FLASH_FLAGS) -O ihex $< $@
 
 $(BDIR)/%.eep: $(TARGET) | $(BDIR)
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	-avr-objcopy $(HEX_EEPROM_FLAGS) -O ihex $< $@ || exit 0
 
 $(BDIR)/%.lss: $(TARGET) | $(BDIR)
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	avr-objdump -h -S $< > $@
 
 $(BDIR):
-	@echo "----" $@ "----"
+	@echo ---- $@ ----
 	mkdir -p $(BDIR)
 
 # Eye candy: AVR Studio 3.x does not check make's exit code but relies on
@@ -115,7 +115,7 @@ end:
 ## Clean target
 .PHONY: clean
 clean:
-	@echo "---- CLEANING ----"
+	@echo ---- CLEANING ----
 	rm -f *~ $(ODIR)/* $(BDIR)/*.*
 
 
