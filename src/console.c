@@ -91,18 +91,6 @@ int main(void) {
 	return 0;
 }
 
-/*
- * Function:  free_RAM
- * --------------------
- * Checks how much RAM is avalible. Doesn't actually free RAM.
- *
- */
-int free_RAM(void) {
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
-}
-
 
 /*
  * Function:  initialise_game_console

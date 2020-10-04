@@ -52,10 +52,10 @@ extern direction_t direction;
  *
  */
 void play_snake_game() {
-	point_t food, tail, head = {.x = START_X, .y = START_Y};
+	point_t tail, head = {.x = START_X, .y = START_Y};
 	snake_t* snake = create_snake(head, direction);
 	//srand_adc();
-	//food = generate_food();
+	//point_t food = generate_food();
 	
 	while (TRUE) {
 		head = add_to_head(snake, direction); 

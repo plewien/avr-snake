@@ -21,7 +21,7 @@ DESCRIPTION:
 #include <assert.h>
 
 typedef unsigned char bool;
-#define byte unsigned char 
+#define byte unsigned char
 
 /*ON OFF*/
 #define ON 		0xFF
@@ -39,8 +39,6 @@ typedef unsigned char bool;
 /*SET and GET MACRO*/
 #define SET(PORT,MASK,VALUE) 	PORT = ((MASK & VALUE) | (PORT & ~MASK))
 #define GET(PORT,MASK) 			PORT & MASK
-#define HIGH_NIBBLE(BYTE) 		((BYTE >> 4) & 0x0F)
-#define LOW_NIBBLE(BYTE) 		(BYTE & 0x0F)
 
 // Function declarations
 void initialise_game_console();

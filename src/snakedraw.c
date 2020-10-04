@@ -16,7 +16,7 @@ extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
 
 void update_display_buffer(point_t pt, obj_t object) {
 	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte page = (pt.y / SNAKE_ROWS_PER_PAGE);
+	byte page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
 	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
 	byte mask = _BV(bit_start) | _BV(bit_start+1);
 	byte msg = (object&0b11) << bit_start;
@@ -38,7 +38,7 @@ void update_display_buffer(point_t pt, obj_t object) {
  */
 byte write_display(point_t pt) {
 	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte snake_page = (pt.y / SNAKE_ROWS_PER_PAGE);
+	byte snake_page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
 	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
 	
 	// select applicable wall data
@@ -46,17 +46,18 @@ byte write_display(point_t pt) {
 	if (bit_start < 4) {
 		wall_data = GET(0x0F, data);
 	} else {
-		wall_data = (GET(0xF0, data) >> 4);
+		wall_data = (GET(0xF0, data)) >> 4;
 	}
 	
 
 	// transcribe to pixel data
-	byte i, j, shift, pixel_data = 0x00;
-	byte wall_mask = 0b11, pixel_mask = 0x0F;
+	byte i, j, shift;
+	byte pixel_data = 0x00;
+	byte wall_mask, pixel_mask;
 	for (i=0; i<2; i++) {
 		shift = i*SNAKE_ROW_BIT_SIZE;
-		wall_mask <<= i*SNAKE_ROW_BIT_SIZE;
-		pixel_mask <<= i*SNAKE_WIDTH;
+		wall_mask = 0b11 << shift;
+		pixel_mask = 0x0F << i*SNAKE_WIDTH;
 		if ((GET(wall_data, wall_mask) >> shift) == 0) {
 			SET(pixel_data, pixel_mask, OFF);
 		} else {
@@ -184,28 +185,6 @@ byte interleave(byte value) {
     return x;
 }
 
-
-/*
- * Function:  interleave2
- * -----------------------
- * Bit duplication of an 2-bit value into a 8-bit byte. With two 
- * bits, it's easier to run on a case-by-case method rather than 
- * use bit operations. There are only FOUR cases, after all.
- *
- *  value: 4-bit value to be duplicated.
- *	returns: Duplicated byte, e.g. 0b10 -> 0b11110000.
- *
- */
-byte interleave2(byte value) {
-	switch (value) {
-		case 0b00: return 0x00;
-		case 0b01: return 0x0F;
-		case 0b10: return 0xF0;
-		case 0b11: return 0xFF;
-		default: return 0x00;
-	}
-}
-
 /*
  * Function:  redraw_all_walls
  * ----------------------------
@@ -213,6 +192,7 @@ byte interleave2(byte value) {
  * 'mini-map' in the top-left corner of the screen.
  *
  */
+ 
 void draw_all_walls(void) {
 	uint8_t page;
 	uint8_t column;
@@ -226,22 +206,25 @@ void draw_all_walls(void) {
 	return;
 }
 
-
+/*
 void draw_minimap(void) {
-	uint8_t elem, row, page, column;
-	byte pixel_data = 0x00;
+	uint8_t i, elem, page, column;
+	byte mask, data, pixel_data = 0x00;
 	for (column=0; column<MAX_SNAKE_COLUMN; column++) {
-		for (row=0; row<MAX_SNAKE_ROW; row++) {
-			elem = row%PIXEL_PER_PAGE;
-			if (walls[column][row] != EMPTY) {
-				SET(pixel_data, _BV(elem), ON);
-			} else {
-				SET(pixel_data, _BV(elem), OFF);
+		for (page=0; page<MAX_SNAKE_PAGE; page++) {
+			data = walls[column][page];
+			for (i=0; i<4; i++) {
+				mask = 0b11 << 2*i;
+				elem = i + 4*(page%2);
+				if ((GET(data,mask)) != 0x00) {
+					SET(pixel_data, _BV(elem), ON);
+				} else {
+					SET(pixel_data, _BV(elem), OFF);
+				}
 			}
-			if (elem == 7) {
-				page = row/PIXEL_PER_PAGE;
-				select_page(page);
+			if (page%2 == 1 || (page == MAX_SNAKE_PAGE-1)) {
 				select_column(column);
+				select_page(page/2);
 				LCD_data_tx(pixel_data);
 				pixel_data = 0x00;
 			}
@@ -249,4 +232,4 @@ void draw_minimap(void) {
 	}
 	return;
 }
-
+*/
