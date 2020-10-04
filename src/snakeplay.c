@@ -22,6 +22,8 @@ DESCRIPTION:
 volatile byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ OFF }};
 extern direction_t direction;
 
+
+ISR(RESET
 /*
  * Function:  play_snake_game
  * ---------------------------
@@ -54,21 +56,21 @@ extern direction_t direction;
 void play_snake_game() {
 	point_t tail, head = {.x = START_X, .y = START_Y};
 	snake_t* snake = create_snake(head, direction);
-	//srand_adc();
-	//point_t food = generate_food();
+	srand_adc();
+	point_t food = generate_food();
 	
 	while (TRUE) {
 		head = add_to_head(snake, direction); 
-		// food = check_food_collision(snake, food);
-		// check_wall_collision(snake);
+		food = check_food_collision(snake, food);
+		check_wall_collision(snake);
 		draw(head);  // Only draw head once the collision has been checked
 
 		while (snake->length >= snake->max_length) {
 			tail = remove_from_tail(snake);
 			clear(tail);
 		}
-		draw_all_walls();
-		//draw_minimap();
+		//draw_all_walls();
+		draw_minimap();
 		_delay_ms(SPEED); // Pause before drawing next pixel
 	}
 	
@@ -120,8 +122,11 @@ byte is_wall(point_t pt) {
 	
 	// TODO: Check if the wall is actually a food?
 	// TODO: Return false if out of bounds
-	
-	return walls[pt.x][pt.y] == WALL;
+	byte col = pt.x % MAX_SNAKE_COLUMN;
+	byte page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
+	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
+	byte object = GET(0x11, walls[col][page] >> bit_start);
+	return object == WALL;
 }
 
 

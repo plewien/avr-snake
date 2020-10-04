@@ -42,11 +42,11 @@ byte write_display(point_t pt) {
 	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
 	
 	// select applicable wall data
-	byte wall_data, data = walls[col][snake_page];
+	byte offset, wall_data = walls[col][snake_page];
 	if (bit_start < 4) {
-		wall_data = GET(0x0F, data);
+		offset = 0;
 	} else {
-		wall_data = (GET(0xF0, data)) >> 4;
+		offset = 2*SNAKE_ROW_BIT_SIZE;
 	}
 	
 
@@ -55,10 +55,10 @@ byte write_display(point_t pt) {
 	byte pixel_data = 0x00;
 	byte wall_mask, pixel_mask;
 	for (i=0; i<2; i++) {
-		shift = i*SNAKE_ROW_BIT_SIZE;
+		shift = (offset + i*SNAKE_ROW_BIT_SIZE);
 		wall_mask = 0b11 << shift;
 		pixel_mask = 0x0F << i*SNAKE_WIDTH;
-		if ((GET(wall_data, wall_mask) >> shift) == 0) {
+		if ((GET(wall_data, wall_mask)) == 0) {
 			SET(pixel_data, pixel_mask, OFF);
 		} else {
 			SET(pixel_data, pixel_mask, ON);
@@ -79,7 +79,7 @@ byte write_display(point_t pt) {
 
 
 	//Select pixel locations and draw
-	byte left_column = 12+(SNAKE_WIDTH*pt.x)%MAX_COLUMN;
+	byte left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
 	byte page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
 	select_page(page);
 	for (i=0; i < SNAKE_WIDTH; i++) {
@@ -206,7 +206,7 @@ void draw_all_walls(void) {
 	return;
 }
 
-/*
+
 void draw_minimap(void) {
 	uint8_t i, elem, page, column;
 	byte mask, data, pixel_data = 0x00;
@@ -232,4 +232,4 @@ void draw_minimap(void) {
 	}
 	return;
 }
-*/
+

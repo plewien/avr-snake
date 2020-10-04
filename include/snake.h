@@ -82,17 +82,17 @@ void 		draw_minimap(void);
 //Snake Interface
 #define SPEED 				200 //ms
 #define SNAKE_WIDTH			4
-#define TEXT_HEIGHT			8
-#define MAX_SNAKE_COLUMN 	12 //MAX_COLUMN/SNAKE_WIDTH
-#define MAX_SNAKE_ROW		8 // MAX_ROW/SNAKE_WIDTH   //(MAX_ROW-TEXT_HEIGHT)
 #define SNAKE_ROWS_PER_PAGE	4 // Used to store multiple walls per byte in memory
-#define SNAKE_ROW_BIT_SIZE	2 //(BIT_PER_BYTE/SNAKE_ROWS_PER_PAGE)
-#define MAX_SNAKE_PAGE		2 // (MAX_SNAKE_ROW/SNAKE_ROWS_PER_PAGE)
+#define TEXT_HEIGHT			8
+#define MAX_SNAKE_COLUMN 	(MAX_COLUMN/SNAKE_WIDTH)
+#define MAX_SNAKE_ROW		((MAX_ROW-TEXT_HEIGHT)/SNAKE_WIDTH)
+#define SNAKE_ROW_BIT_SIZE	(BIT_PER_BYTE/SNAKE_ROWS_PER_PAGE)
+#define MAX_SNAKE_PAGE		(MAX_SNAKE_ROW/SNAKE_ROWS_PER_PAGE)
 #define MAX_SEED			(MAX_SNAKE_COLUMN*MAX_SNAKE_ROW)
 
 #define START_X				(MAX_SNAKE_COLUMN/2)
 #define START_Y				(MAX_SNAKE_ROW/2)
-#define START_LENGTH		2
+#define START_LENGTH		5
 #define LENGTH_DELTA		5
 
 /*** End of Snake Header File ****/
