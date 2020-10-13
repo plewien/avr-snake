@@ -21,7 +21,7 @@ DESCRIPTION:
 
 #include "console.h"
 #include "snake.h"
-
+#include "dogm-graphic.h"
 
 
 /*********************************
@@ -127,25 +127,12 @@ void initialise_game_console(void) {
 	PWM_GENERATION_MODE(FAST_PWM);
 	SET_BRIGHTNESS(DEFAULT_BRIGHTNESS);
 
-	//Enable SPI, Set as Master
-	SS_DIR(OUT); //Ensures ATMEGA16 is master
-	SS_SET(HIGH); //Don't want to upset the master
-	MOSI_DIR(OUT);
-	MISO_DIR(IN);
-	SCK_DIR(OUT);
-    SET(SPCR,SPI_ENABLE,ON); //Setup SPI
+	//Set up SPI with LCD display
+	lcd_init();
+	lcd_set_font(FONT_FIXED_8, NORMAL);
 	
-	//Set up LCD display
-	LCD_CHIP_SELECT_DIR(OUT);
-	LCD_CHIP_DESELECT; //Don't select LCD before ready
-	LCD_A0_DIR(OUT); //For command/data control
-	LCD_RESET_DIR(OUT);
-	LCD_RESET(LOW); //Reset before build
-	LCD_RESET(HIGH);
-	LCD_initialise();
-	LCD_clear();
-
-	BAT_LOW_LED(OFF); //Loading sequence finished
+	//Loading sequence finished
+	BAT_LOW_LED(OFF); 
 	return;
 }
 
@@ -162,6 +149,23 @@ byte SPI_tx(byte tx_byte) {
 	SPDR = tx_byte;	//Load data into buffer
     while(!(SPSR & (1<<SPIF))); //Wait until transmission complete
 	return tx_byte;
+}
+
+
+/*
+ * Function:  init_spi_lcd
+ * ------------------------
+ * Load data into SPI. Remember to chip-select first!
+ *	
+ *	returns: The transmitted byte.
+ *
+ */
+void init_spi_lcd() {
+	DDRB = SS_PIN | MISO_PIN | MOSI_PIN | SCK_PIN;
+	SET(PORTB, SS_PIN, HIGH);
+	SPCR = (0<<SPIE) | (1<<SPE) | (0<<DORD) | (1<<MSTR) | (1<<CPOL) | (1<<CPHA) | (1<<SPR0);
+	//SPSR = 1<<SPI2X;
+	//SPDR = LCD_NO_OP; //Do not use 0 here, only LCD_NOP is allowed!
 }
 
 

@@ -77,6 +77,7 @@ byte 		interleave(byte x);
 byte 		interleave2(byte x);
 void 		draw_all_walls(void);
 void 		draw_minimap(void);
+void		write_score(uint8_t score);
 
 
 //Snake Interface

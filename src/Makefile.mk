@@ -16,6 +16,8 @@ DDIR = $(ODIR)/dep
 IDIR = ../include
 TARGET = $(PROJECT).elf   # elf target must go in same folder as makefile
 
+
+
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
 
@@ -25,12 +27,7 @@ GENDEPFLAGS = -MP -MD -MT $(*F).o # -MF $(DDIR)/$(@F).d
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
 CFLAGS += -Wall -gdwarf-2 -DF_CPU=7379300UL -Os -fsigned-char -fshort-enums
-CFLAGS += -I$(IDIR) $(GENDEPFLAGS) # -MF dep/$(@F).d 
-
-## Assembly specific flags
-ASMFLAGS = $(COMMON)
-ASMFLAGS += $(CFLAGS)
-ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
+CFLAGS += -I$(IDIR) -I$(EDIR) $(GENDEPFLAGS)
 
 ## Linker flags
 LDFLAGS = $(COMMON)
@@ -48,16 +45,22 @@ HEX_EEPROM_FLAGS += --set-section-flags=.eeprom="alloc,load"
 _INC = console.h snake.h
 INCLUDE = $(patsubst %,$(IDIR)/%,$(_INC))
 
-## Objects that must be built in order to link
-_OBJ = console.o snake.o snakedraw.o snakeplay.o
-OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJ))
+## External dependencies
+LIB = lcdlib
+EDIR = ../../$(LIB)
+_EINC = dogm-graphic.h font.h
+INCLUDE_EXT = $(patsubst %,$(EDIR)/%,$(_EINC))
+_EOBJ = dogm-graphic.o font.o Fonts/font_fixed_8px.o
+EXTERNALOBJECTS = $(patsubst %,$(ODIR)/$(LIB)/%,$(_EOBJ))
 
-## Dependencies
+## Objects that must be built in order to link
+_OBJ = console.o snake.o draw.o play.o
+OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJ))
+OBJECTS += $(EXTERNALOBJECTS)
+
+## Linker dependencies
 _DEP = SnakeProject.hex SnakeProject.eep
 DEPS = $(patsubst %,$(BDIR)/%,$(_DEP))
-
-## Objects explicitly added by the user
-LINKONLYOBJECTS = 
 
 # Define Messages
 MSG_BEGIN = -------- BEGIN --------
@@ -79,14 +82,22 @@ $(ODIR)/%.o: %.c $(INCLUDE) | $(ODIR)
 	@echo ---- $@ ----
 	$(CC) -c $< -o $@ $(CFLAGS)
 
+$(ODIR)/$(LIB)/%.o: $(EDIR)/%.c $(INCLUDE_EXT) | $(ODIR_EXT)
+	@echo ---- $@ ----
+	$(CC) -c $< -o $@ $(CFLAGS)
+
 $(ODIR):
 	@echo ---- $@ ----
 	mkdir -p $(ODIR)
 
+$(ODIR)/$(LIB):
+	@echo ---- $@ ----
+	mkdir -p $(ODIR)/$(LIB)
+
 ##Link
 $(TARGET): $(OBJECTS)
 	@echo ---- LINKING ----
-	$(CC) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
 
 $(BDIR)/%.hex: $(TARGET) | $(BDIR)
 	@echo ---- $@ ----

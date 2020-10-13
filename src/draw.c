@@ -11,6 +11,7 @@ DESCRIPTION:
 
 #include "console.h"
 #include "snake.h"
+#include "dogm-graphic.h"
 
 extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
 
@@ -232,4 +233,12 @@ void draw_minimap(void) {
 	}
 	return;
 }
+
+void write_score(uint8_t score) {
+	lcd_moveto_xy(7,2);
+	lcd_putstr("score:");
+	lcd_moveto_xy(7,80);
+	lcd_put_uint(score);
+}
+
 

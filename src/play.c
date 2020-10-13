@@ -23,7 +23,6 @@ volatile byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ OFF }};
 extern direction_t direction;
 
 
-ISR(RESET
 /*
  * Function:  play_snake_game
  * ---------------------------
@@ -70,7 +69,8 @@ void play_snake_game() {
 			clear(tail);
 		}
 		//draw_all_walls();
-		draw_minimap();
+		//draw_minimap();
+		write_score(snake->length);
 		_delay_ms(SPEED); // Pause before drawing next pixel
 	}
 	
