@@ -41,11 +41,9 @@ typedef struct {
 
 // Game function declarations
 void 		play_snake_game(void);
-void 		reset_snake_game(snake_t* snake);
-void		srand_adc(void);
+void 		end_snake_game(snake_t* snake);
 byte 		is_wall(point_t pt);
 void 		clear_walls(void);
-void 		check_wall_collision(snake_t* snake);
 bool		equal_pts(point_t pt1, point_t pt2);
 
 // Snake function declarations
@@ -72,10 +70,6 @@ byte 		write_display(point_t pt);
 void 		draw(point_t s_pos);
 void		draw_food(point_t pt);
 void 		clear(point_t s_pos);
-byte 		get2bits(byte data, byte pixel);
-byte 		interleave(byte x);
-byte 		interleave2(byte x);
-void 		draw_all_walls(void);
 void 		draw_minimap(void);
 void		write_score(uint8_t score);
 
@@ -88,7 +82,7 @@ void		write_score(uint8_t score);
 #define MAX_SNAKE_COLUMN 	(MAX_COLUMN/SNAKE_WIDTH)
 #define MAX_SNAKE_ROW		((MAX_ROW-TEXT_HEIGHT)/SNAKE_WIDTH)
 #define SNAKE_ROW_BIT_SIZE	(BIT_PER_BYTE/SNAKE_ROWS_PER_PAGE)
-#define MAX_SNAKE_PAGE		(MAX_SNAKE_ROW/SNAKE_ROWS_PER_PAGE)
+#define MAX_SNAKE_PAGE		5  //(CEILING(MAX_SNAKE_ROW, SNAKE_ROWS_PER_PAGE)
 #define MAX_SEED			(MAX_SNAKE_COLUMN*MAX_SNAKE_ROW)
 
 #define START_X				(MAX_SNAKE_COLUMN/2)

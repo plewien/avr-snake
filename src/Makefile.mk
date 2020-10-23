@@ -127,7 +127,7 @@ end:
 .PHONY: clean
 clean:
 	@echo ---- CLEANING ----
-	rm -f *~ $(ODIR)/* $(BDIR)/*.*
+	rm -f *~ $(ODIR)/$(LIB)/*.* $(ODIR)/*.* $(BDIR)/*.* 
 
 
 ## Other dependencies

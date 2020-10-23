@@ -50,7 +50,6 @@ byte write_display(point_t pt) {
 		offset = 2*SNAKE_ROW_BIT_SIZE;
 	}
 	
-
 	// transcribe to pixel data
 	byte i, j, shift;
 	byte pixel_data = 0x00;
@@ -82,10 +81,9 @@ byte write_display(point_t pt) {
 	//Select pixel locations and draw
 	byte left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
 	byte page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
-	select_page(page);
+	lcd_moveto_xy(page, left_column);
 	for (i=0; i < SNAKE_WIDTH; i++) {
-		select_column(left_column+i);
-		LCD_data_tx(pixel_data);
+		lcd_data(pixel_data);
 	}
 	return(TRUE);
 }
@@ -133,81 +131,6 @@ void draw_food(point_t pt) {
 }
 
 
-/*
- * Function:  get2bits
- * --------------------
- * Returns two bits from a byte of data, with location specified by pixel. This
- * is used to select two pixels from the wall data to be updated on the screen.
- *	
- *	Example:
- *		get2bits(0x0C, 2) = get2bits(0x0C, 3) = 0b11.
- * 
- *
- *	data: The byte of data to be selected from. 
- * 	pixel: The location in the byte of data, which is rounded down to even with 'shift'.
- *  returns: The two bits selected from data.
- *
- */
-byte get2bits(byte data, byte pixel) {
-	byte shift = pixel - (pixel % 2);
-	return (data >> shift) & 0x03;
-}
-
-
-/*
- * Function:  interleave
- * ----------------------
- * Bit duplication of an 4-bit value into a 8-bit byte. Used to 
- * replicate 4-bits of a wall_buffer to be used as a page when
- * writing to the LCD.
- * 
- * Demonstration:
- * 		+---+---------+---------+
- *		| 0 | _ _ _ _ | A B C D |
- *		+---+---------+---------+
- *		| 1 | _ _ A B | _ _ C D |
- *		+---+---------+---------+
- *		| 2 | _ A _ B | _ C _ D |
- *		+---+---------+---------+
- *		| 3 | A A B B | C C D D |
- *		+---+---------+---------+
- *
- * See https://stackoverflow.com/questions/55051490/bit-duplication-from-8-bit-to-32-bit
- * for more information on bit duplication.
- * 
- *  value: 4-bit value to be duplicated.
- *
- */
-byte interleave(byte value) {
-	byte x = value;
-    x = (x | (x << 2)) & 0x33;
-    x = (x | (x << 1)) & 0x55;
-    x |= (x << 1);
-    return x;
-}
-
-/*
- * Function:  redraw_all_walls
- * ----------------------------
- * Debugging function for checking that all walls have been drawn. Displays a 
- * 'mini-map' in the top-left corner of the screen.
- *
- */
- 
-void draw_all_walls(void) {
-	uint8_t page;
-	uint8_t column;
-	for (page = 0; page<MAX_SNAKE_PAGE; page++) {
-		select_page(page);
-		for (column = 0; column<MAX_SNAKE_COLUMN; column++) {
-			select_column(column);
-			LCD_data_tx(walls[column][page]);
-		}
-	}
-	return;
-}
-
-
 void draw_minimap(void) {
 	uint8_t i, elem, page, column;
 	byte mask, data, pixel_data = 0x00;
@@ -224,9 +147,8 @@ void draw_minimap(void) {
 				}
 			}
 			if (page%2 == 1 || (page == MAX_SNAKE_PAGE-1)) {
-				select_column(column);
-				select_page(page/2);
-				LCD_data_tx(pixel_data);
+				lcd_moveto_xy(page/2, column);
+				lcd_data(pixel_data);
 				pixel_data = 0x00;
 			}
 		}
@@ -239,6 +161,10 @@ void write_score(uint8_t score) {
 	lcd_putstr("score:");
 	lcd_moveto_xy(7,80);
 	lcd_put_uint(score);
+	return;
 }
+
+
+
 
 

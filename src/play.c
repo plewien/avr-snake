@@ -55,57 +55,48 @@ extern direction_t direction;
 void play_snake_game() {
 	point_t tail, head = {.x = START_X, .y = START_Y};
 	snake_t* snake = create_snake(head, direction);
-	srand_adc();
 	point_t food = generate_food();
 	
 	while (TRUE) {
 		head = add_to_head(snake, direction); 
 		food = check_food_collision(snake, food);
-		check_wall_collision(snake);
-		draw(head);  // Only draw head once the collision has been checked
-
+		/*if (is_wall(head)) {
+			end_snake_game(snake);
+			break;
+		}*/
+		
+		// Only draw head once the collision has been checked
+		draw(head);
+		write_score(snake->length);  
 		while (snake->length >= snake->max_length) {
 			tail = remove_from_tail(snake);
 			clear(tail);
 		}
-		//draw_all_walls();
-		//draw_minimap();
-		write_score(snake->length);
-		_delay_ms(SPEED); // Pause before drawing next pixel
+		draw_minimap();
+
+		// Pause before drawing next pixel
+		_delay_ms(SPEED); 
 	}
 	
 }
 
 
-/*
- * Function:  srand_adc
- * ---------------------
- * The pseudo-random number generator is usually seeded with time(NULL). However,
- * in an AVR program, a reference time isn't kept. Instead, a random seed can be 
- * generated using the high-resolution bits of an analog-digital converter (ADC).
- *
- */
-void srand_adc(void) {
-	START_ADC_CONVERSION;
-	while(WAIT_FOR_CONVERSION);
-	srand(ADCL);  // seed with low-byte of ADC
-}
+
 
 
 /*
- * Function:  reset_snake_game
+ * Function:  end_snake_game
  * ----------------------------
  * The game should be reset whenever it is game-over. This involves clearing the
  * screen and freeing the memory associated with the walls and snake. A game-over
  * message should be displayed on the screen for the user too.
  *
  */
-void reset_snake_game(snake_t* snake) {
+void end_snake_game(snake_t* snake) {
 	LCD_clear();
 	clear_snake(snake);
 	clear_walls();
-
-	// TODO: Display game-over.
+	display_game_over_screen();
 	return;
 }
 
@@ -220,23 +211,5 @@ point_t check_food_collision(snake_t* snake, point_t food) {
 		return generate_food();
 	} else {
 		return food;
-	}
-}
-
-
-/*
- * Function:  check_wall_collision
- * --------------------------------
- * Checks if the snake has run into itself, resetting the game if that is the case.
- *
- *  snake: The linked-list representing the snake.
- *	food: The location of the food.
- *
- *  returns: void.
- *
- */
-void check_wall_collision(snake_t* snake) {
-	if (is_wall(get_head_position(snake))) {
-		reset_snake_game(snake);
 	}
 }

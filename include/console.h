@@ -36,9 +36,10 @@ typedef unsigned char bool;
 #define FORWARD 0x00
 #define BACK 	0xFF
 
-/*SET and GET MACRO*/
+/*Helpful Macros*/
 #define SET(PORT,MASK,VALUE) 	PORT = ((MASK & VALUE) | (PORT & ~MASK))
 #define GET(PORT,MASK) 			PORT & MASK
+#define CEILING(X,Y) 			(((X) + (Y) - 1) / (Y))
 
 // Function declarations
 void initialise_game_console();
@@ -51,6 +52,8 @@ void select_column(byte column);
 void draw_pixel(byte row, byte column, byte pixel_data);
 byte bound_check(byte val, byte min, byte max);
 void LCD_clear();
+void srand_adc(void);
+void display_game_over_screen();
 
 
 /*ATMEGA16 Pins*/

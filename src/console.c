@@ -28,6 +28,7 @@ DESCRIPTION:
  **		GLOBAL VARIABLES		**
  *********************************/
 volatile direction_t direction = RIGHT;
+volatile byte action_a_flag = FALSE;
 //volatile byte button_pressed_flag = FALSE;
 
 
@@ -53,8 +54,7 @@ ISR(INT1_vect) { //Button NAND ISR
 		//button_pressed_flag = TRUE;
 	}
 	if (ACTION_A_BUTTON) { //Reset screen: debug only
-		LCD_clear();
-		clear_walls();
+		action_a_flag = TRUE;
 	}
 	if (ACTION_B_BUTTON) { //Up the brightness
 		INCREASE_BRIGHTNESS;
@@ -83,10 +83,12 @@ ISR(TIMER1_OVF_vect) { //Timer ISR for low battery LED
  */
 int main(void) {
 	initialise_game_console();
-
+	
 	//TODO: Initalise game menu screen
-
-	play_snake_game();
+	while(TRUE) {
+		play_snake_game();
+	}
+	
 
 	return 0;
 }
@@ -120,17 +122,20 @@ void initialise_game_console(void) {
 	ENABLE_TIMER_INTERRUPT;
 	INTERRUPT_TIMER_MODE(TIMER_PRESCALE_1024);
 	sei(); //Enable global interrupts
+
+	//Set up SPI with LCD display
+	lcd_init();
+	lcd_set_font(FONT_FIXED_8, NORMAL);
 	
 	//Set up LCD PWM
 	LCD_BACKLIGHT(OFF);
 	LCD_BACKLIGHT_DIR(OUT);
 	PWM_GENERATION_MODE(FAST_PWM);
 	SET_BRIGHTNESS(DEFAULT_BRIGHTNESS);
-
-	//Set up SPI with LCD display
-	lcd_init();
-	lcd_set_font(FONT_FIXED_8, NORMAL);
 	
+	//Seed random generator
+	srand_adc();
+
 	//Loading sequence finished
 	BAT_LOW_LED(OFF); 
 	return;
@@ -156,8 +161,6 @@ byte SPI_tx(byte tx_byte) {
  * Function:  init_spi_lcd
  * ------------------------
  * Load data into SPI. Remember to chip-select first!
- *	
- *	returns: The transmitted byte.
  *
  */
 void init_spi_lcd() {
@@ -305,14 +308,39 @@ byte bound_check(byte val, byte min, byte max) {
  *	
  */
 void LCD_clear(void) {
-	uint8_t page;
-	uint8_t column;
-	for (page = 0; page<MAX_PAGE; page++) {
-		select_page(page);
-		for (column = 0; column<MAX_COLUMN; column++) {
-			select_column(column);
-			LCD_data_tx(OFF);
-		}
+	//clear display content
+	lcd_clear_area_xy(LCD_RAM_PAGES,LCD_WIDTH,NORMAL,0,0); 
+	return;
+}
+
+
+/*
+ * Function:  srand_adc
+ * ---------------------
+ * The pseudo-random number generator is usually seeded with time(NULL). However,
+ * in an AVR program, a reference time isn't kept. Instead, a random seed can be 
+ * generated using the high-resolution bits of an analog-digital converter (ADC).
+ *
+ */
+void srand_adc(void) {
+	START_ADC_CONVERSION;
+	while(WAIT_FOR_CONVERSION);
+	srand(ADCL);  // seed with low-byte of ADC
+	return;
+}
+
+void display_game_over_screen(void) {
+	
+	lcd_moveto_xy(2,20);
+	lcd_putstr("GAME OVER");
+	lcd_moveto_xy(4,13);
+	lcd_putstr("play again?");
+	action_a_flag = FALSE;
+
+	while(action_a_flag == FALSE) {
+		_delay_ms(100);
 	}
+	
+	LCD_clear();
 	return;
 }
