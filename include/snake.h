@@ -20,8 +20,6 @@ typedef struct {
 	byte y;
 } point_t;
 
-typedef enum {UP,DOWN,LEFT,RIGHT} direction_t;
-
 typedef enum {EMPTY=0b00,WALL=0b01,FOOD=0b10,SPECIAL=0b11} obj_t;
 
 typedef struct node node_t;
@@ -42,6 +40,9 @@ typedef struct {
 // Game function declarations
 void 		play_snake_game(void);
 void 		end_snake_game(snake_t* snake);
+direction_t update_direction(direction_t current);
+void 		update_buffer(point_t pt, obj_t object);
+address_t 	pt2buffer(point_t pt);
 byte 		is_wall(point_t pt);
 void 		clear_walls(void);
 bool		equal_pts(point_t pt1, point_t pt2);
@@ -65,8 +66,8 @@ point_t 	generate_random_location(void);
 point_t		check_food_collision(snake_t* snake, point_t food);
 
 // Drawing function declarations
-void 		update_display_buffer(point_t pt, obj_t object);
 byte 		write_display(point_t pt);
+address_t	pt2display(point_t pt);
 void 		draw(point_t s_pos);
 void		draw_food(point_t pt);
 void 		clear(point_t s_pos);

@@ -20,16 +20,16 @@ DESCRIPTION:
 
 
 #include "console.h"
-#include "snake.h"
 #include "dogm-graphic.h"
 
 
 /*********************************
  **		GLOBAL VARIABLES		**
  *********************************/
-volatile direction_t direction = RIGHT;
+volatile direction_t selected_direction = RIGHT;
+volatile byte direction_pressed_flag = FALSE;
 volatile byte action_a_flag = FALSE;
-//volatile byte button_pressed_flag = FALSE;
+//
 
 
 
@@ -37,24 +37,24 @@ volatile byte action_a_flag = FALSE;
  **	INTERRUPT SERVICE ROUTINES  **
  *********************************/
 ISR(INT1_vect) { //Button NAND ISR
-	if (UP_BUTTON && direction!=DOWN) {
-		direction = UP;
-		//button_pressed_flag = TRUE;
+	if (UP_BUTTON) {
+		selected_direction = UP;
+		direction_pressed_flag = TRUE;
 	}
-	if (DOWN_BUTTON && direction!=UP) {
-		direction = DOWN;
-		//button_pressed_flag = TRUE;
+	if (DOWN_BUTTON) {
+		selected_direction = DOWN;
+		direction_pressed_flag = TRUE;
 	}
-	if (LEFT_BUTTON && direction!=RIGHT) {
-		direction = LEFT;
-		//button_pressed_flag = TRUE;
+	if (LEFT_BUTTON) {
+		selected_direction = LEFT;
+		direction_pressed_flag = TRUE;
 	}
-	if (RIGHT_BUTTON && direction!=LEFT) {
-		direction = RIGHT;
-		//button_pressed_flag = TRUE;
+	if (RIGHT_BUTTON) {
+		selected_direction = RIGHT;
+		direction_pressed_flag = TRUE;
 	}
 	if (ACTION_A_BUTTON) { //Reset screen: debug only
-		action_a_flag = TRUE;
+		//action_a_flag = TRUE;
 	}
 	if (ACTION_B_BUTTON) { //Up the brightness
 		INCREASE_BRIGHTNESS;
@@ -87,9 +87,9 @@ int main(void) {
 	//TODO: Initalise game menu screen
 	while(TRUE) {
 		play_snake_game();
+		display_game_over_screen();
 	}
 	
-
 	return 0;
 }
 
@@ -143,21 +143,6 @@ void initialise_game_console(void) {
 
 
 /*
- * Function:  SPI_tx
- * ------------------
- * Load data into SPI. Remember to chip-select first!
- *	
- *	returns: The transmitted byte.
- *
- */
-byte SPI_tx(byte tx_byte) {
-	SPDR = tx_byte;	//Load data into buffer
-    while(!(SPSR & (1<<SPIF))); //Wait until transmission complete
-	return tx_byte;
-}
-
-
-/*
  * Function:  init_spi_lcd
  * ------------------------
  * Load data into SPI. Remember to chip-select first!
@@ -169,115 +154,6 @@ void init_spi_lcd() {
 	SPCR = (0<<SPIE) | (1<<SPE) | (0<<DORD) | (1<<MSTR) | (1<<CPOL) | (1<<CPHA) | (1<<SPR0);
 	//SPSR = 1<<SPI2X;
 	//SPDR = LCD_NO_OP; //Do not use 0 here, only LCD_NOP is allowed!
-}
-
-
-/*
- * Function:  LCD_command_tx
- * --------------------------
- * Sends a command byte to the LCD. Chip select is performed inside this function,
- * so no need to do so externally.
- *
- */
-void LCD_command_tx(byte tx_byte) {
-	LCD_CHIP_SELECT;
-	LCD_COMMAND;
-	SPI_tx(tx_byte);
-	LCD_CHIP_DESELECT;
-	return;
-}
-
-
-/*
- * Function:  LCD_data_tx
- * -----------------------
- * Sends a data byte to LCD. Chip select is performed inside this function,
- * so no need to do so externally.
- *
- */
-void LCD_data_tx(byte tx_byte) {
-	LCD_CHIP_SELECT;
-	LCD_DATA;
-	SPI_tx(tx_byte);
-	LCD_CHIP_DESELECT;
-	return;
-}
-
-
-/*
- * Function:  LCD_initialise
- * --------------------------
- * Initialise LCD, to be run at power-up.
- *
- */
-void LCD_initialise(void) {
-	LCD_command_tx(0x40);//Display start line 0
-	LCD_command_tx(0xA1);//SEG reverse
-	LCD_command_tx(0xC0);//Normal COM0~COM63
-	LCD_command_tx(0xA4);//Disable -> Set All Pixel to ON
-	LCD_command_tx(0xA6);//Display inverse off
-	_delay_ms(120);
-	LCD_command_tx(0xA2);//Set LCD Bias Ratio A2/A3
-	LCD_command_tx(0x2F);//Set Power Control 28...2F
-	LCD_command_tx(0x27);//Set VLCD Resistor Ratio 20...27
-	LCD_command_tx(0x81);//Set Electronic Volume
-	LCD_command_tx(0x10);//Set Electronic Volume 00...3F
-	LCD_command_tx(0xFA);//Set Adv. Program Control
-	LCD_command_tx(0x90);//Set Adv. Program Control x00100yz yz column wrap x Temp Comp
-	LCD_command_tx(0xAF);//Display on
-	return;
-}
-
-
-/*
- * Function:  select_page
- * -----------------------
- * Choose a page to write to on the LCD screen.
- *
- *	page: The page to be selected, from 0 to MAX_PAGE.
- */
-void select_page(byte page) {
-	byte page_cmd_address;
-	page_cmd_address = (CMD_PAGE | (page%MAX_PAGE)); //defensive programming
-	LCD_command_tx(page_cmd_address);
-	return;
-}
-
-
-/*
- * Function:  select_column
- * -------------------------
- * Choose a column to write to on the LCD screen.
- *
- *	column: The column to be selected, from 0 to MAX_COLUMN. If a column is 
- * 			selected outside this range, then its modulus is taken instead.
- */
-void select_column(byte column) {
-	byte page_cmd_address_MSB;
-	byte page_cmd_address_LSB;
-	column %= MAX_COLUMN; //defensive programming
-	page_cmd_address_LSB = (CMD_COL_LSB | (column&0x0F));
-	page_cmd_address_MSB = (CMD_COL_MSB | ((column>>4)&0x0F));
-	LCD_command_tx(page_cmd_address_LSB);
-	LCD_command_tx(page_cmd_address_MSB);
-	return;
-}
-
-
-/*
- * Function:  draw_pixel
- * ----------------------
- * Draws a byte of pixels on the screen, in a given page and column.
- *	
- *	page: 		The page to be selected, from 0 to MAX_PAGE.
- *	column: 	The column to be selected, from 0 to MAX_COLUMN. 
- *	pixel_data: Data for eight pixels, with 1=ON and 0=OFF.
- */
-void draw_pixel(byte page, byte column, byte pixel_data) {
-	select_page(page);
-	select_column(column);
-	LCD_data_tx(pixel_data);
-	return;
 }
 
 

@@ -15,15 +15,15 @@ DESCRIPTION:
 
 extern byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE];
 
-void update_display_buffer(point_t pt, obj_t object) {
-	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
-	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
-	byte mask = _BV(bit_start) | _BV(bit_start+1);
-	byte msg = (object&0b11) << bit_start;
-	SET(walls[col][page], mask, msg);		
-	return;
+
+address_t pt2display(point_t pt) {
+	address_t display;
+	display.column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
+	display.page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
+	display.bit = 0;
+	return display;
 }
+
 
 /*
  * Function:  write_pixel
@@ -79,9 +79,8 @@ byte write_display(point_t pt) {
 
 
 	//Select pixel locations and draw
-	byte left_column = (SNAKE_WIDTH*pt.x)%MAX_COLUMN;
-	byte page = ((SNAKE_WIDTH*pt.y)/PIXEL_PER_PAGE)%MAX_PAGE;
-	lcd_moveto_xy(page, left_column);
+	address_t display = pt2display(pt);
+	lcd_moveto_xy(display.page, display.column);
 	for (i=0; i < SNAKE_WIDTH; i++) {
 		lcd_data(pixel_data);
 	}
@@ -97,7 +96,7 @@ byte write_display(point_t pt) {
  *
  */
 void draw(point_t pt) {
-	update_display_buffer(pt, WALL);
+	update_buffer(pt, WALL);
 	write_display(pt);
 }
 
@@ -111,7 +110,7 @@ void draw(point_t pt) {
  *
  */
 void clear(point_t pt) {
-	update_display_buffer(pt, EMPTY);
+	update_buffer(pt, EMPTY);
 	write_display(pt);
 }
 

@@ -23,6 +23,14 @@ DESCRIPTION:
 typedef unsigned char bool;
 #define byte unsigned char
 
+typedef struct {
+	uint8_t page;
+	uint8_t column;
+	uint8_t bit;
+} address_t;
+
+typedef enum {UP,DOWN,LEFT,RIGHT} direction_t;
+
 /*ON OFF*/
 #define ON 		0xFF
 #define OFF 	0x00
@@ -43,17 +51,11 @@ typedef unsigned char bool;
 
 // Function declarations
 void initialise_game_console();
-void LCD_initialise();
-byte SPI_tx(byte tx_byte);
-void LCD_command_tx(byte tx_byte);
-void LCD_data_tx(byte tx_byte);
-void select_page(byte page);
-void select_column(byte column);
-void draw_pixel(byte row, byte column, byte pixel_data);
 byte bound_check(byte val, byte min, byte max);
+void display_game_over_screen();
 void LCD_clear();
 void srand_adc(void);
-void display_game_over_screen();
+
 
 
 /*ATMEGA16 Pins*/
