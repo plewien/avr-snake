@@ -29,7 +29,7 @@ typedef struct {
 	uint8_t bit;
 } address_t;
 
-typedef enum {UP,DOWN,LEFT,RIGHT} direction_t;
+typedef enum {UP,DOWN,LEFT,RIGHT,NONE} direction_t;
 
 /*ON OFF*/
 #define ON 		0xFF

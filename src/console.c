@@ -21,13 +21,13 @@ DESCRIPTION:
 
 #include "console.h"
 #include "dogm-graphic.h"
+extern void play_snake_game(void);
 
 
 /*********************************
  **		GLOBAL VARIABLES		**
  *********************************/
-volatile direction_t selected_direction = RIGHT;
-volatile byte direction_pressed_flag = FALSE;
+volatile direction_t selected_direction = NONE;
 volatile byte action_a_flag = FALSE;
 //
 
@@ -39,22 +39,18 @@ volatile byte action_a_flag = FALSE;
 ISR(INT1_vect) { //Button NAND ISR
 	if (UP_BUTTON) {
 		selected_direction = UP;
-		direction_pressed_flag = TRUE;
 	}
 	if (DOWN_BUTTON) {
 		selected_direction = DOWN;
-		direction_pressed_flag = TRUE;
 	}
 	if (LEFT_BUTTON) {
 		selected_direction = LEFT;
-		direction_pressed_flag = TRUE;
 	}
 	if (RIGHT_BUTTON) {
 		selected_direction = RIGHT;
-		direction_pressed_flag = TRUE;
 	}
 	if (ACTION_A_BUTTON) { //Reset screen: debug only
-		//action_a_flag = TRUE;
+		action_a_flag = TRUE;
 	}
 	if (ACTION_B_BUTTON) { //Up the brightness
 		INCREASE_BRIGHTNESS;

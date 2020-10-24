@@ -38,13 +38,12 @@ address_t pt2display(point_t pt) {
  *
  */
 byte write_display(point_t pt) {
-	byte col = pt.x % MAX_SNAKE_COLUMN;
-	byte snake_page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
-	byte bit_start = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
+	
 	
 	// select applicable wall data
-	byte offset, wall_data = walls[col][snake_page];
-	if (bit_start < 4) {
+	address_t loc = pt2bufferaddress(pt);
+	byte offset, wall_data = walls[loc.column][loc.page];
+	if (loc.bit < 4) {
 		offset = 0;
 	} else {
 		offset = 2*SNAKE_ROW_BIT_SIZE;
@@ -52,29 +51,26 @@ byte write_display(point_t pt) {
 	
 	// transcribe to pixel data
 	byte i, j, shift;
-	byte pixel_data = 0x00;
+	byte pixel_data[SNAKE_WIDTH] = {0x00};
 	byte wall_mask, pixel_mask;
 	for (i=0; i<2; i++) {
 		shift = (offset + i*SNAKE_ROW_BIT_SIZE);
 		wall_mask = 0b11 << shift;
 		pixel_mask = 0x0F << i*SNAKE_WIDTH;
-		if ((GET(wall_data, wall_mask)) == 0) {
-			SET(pixel_data, pixel_mask, OFF);
-		} else {
-			SET(pixel_data, pixel_mask, ON);
-		}
-		/*for (j=0; j<SNAKE_WIDTH; j++) {
-			switch (GET(wall_data, wall_mask)) {
+		for (j=0; j<SNAKE_WIDTH; j++) {
+			switch (GET(wall_data, wall_mask)>>shift) {
 				case EMPTY:
 					SET(pixel_data[j], pixel_mask, OFF);
 					break;
 				case WALL:
 					SET(pixel_data[j], pixel_mask, ON);
 					break;
+				case FOOD:
+					SET(pixel_data[j], pixel_mask, ON);
 				default:
 					break;
 			}
-		}*/
+		}
 	}
 
 
@@ -82,7 +78,7 @@ byte write_display(point_t pt) {
 	address_t display = pt2display(pt);
 	lcd_moveto_xy(display.page, display.column);
 	for (i=0; i < SNAKE_WIDTH; i++) {
-		lcd_data(pixel_data);
+		lcd_data(pixel_data[i]);
 	}
 	return(TRUE);
 }

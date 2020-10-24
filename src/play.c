@@ -20,6 +20,7 @@ DESCRIPTION:
 #include "snake.h"
 
 volatile byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ OFF }};
+volatile snake_t* snake;
 extern direction_t selected_direction;
 
 
@@ -54,8 +55,8 @@ extern direction_t selected_direction;
  */
 void play_snake_game() {
 	point_t tail, head = {.x = START_X, .y = START_Y};
-	direction_t direction = selected_direction;
-	snake_t* snake = create_snake(head, direction);
+	direction_t direction = RIGHT;
+	snake = create_snake(head, direction);
 	point_t food = generate_food();
 	
 	while (TRUE) {
@@ -81,7 +82,7 @@ void play_snake_game() {
 }
 
 direction_t update_direction(direction_t current) {
-	direction_t update;
+	direction_t update = current;
 	switch (selected_direction) {
 		case UP:
 			if (current != DOWN) update = UP;
@@ -95,6 +96,7 @@ direction_t update_direction(direction_t current) {
 		case RIGHT:
 			if (current != LEFT) update = RIGHT;
 			break;
+		case NONE:
 		default:
 			update = current;
 	}
@@ -117,19 +119,19 @@ void end_snake_game(snake_t* snake) {
 }
 
 void update_buffer(point_t pt, obj_t object) {
-	address_t location = pt2buffer(pt);
+	address_t location = pt2bufferaddress(pt);
 	byte mask = _BV(location.bit) | _BV(location.bit+1);
 	byte msg = (object&0b11) << location.bit;
 	SET(walls[location.column][location.page], mask, msg);		
 	return;
 }
 
-address_t pt2buffer(point_t pt) {
-	address_t buffer;
-	buffer.column = pt.x % MAX_SNAKE_COLUMN;
-	buffer.page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
-	buffer.bit = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
-	return buffer;
+address_t pt2bufferaddress(point_t pt) {
+	address_t location;
+	location.column = pt.x % MAX_SNAKE_COLUMN;
+	location.page = (pt.y / SNAKE_ROWS_PER_PAGE) % MAX_SNAKE_PAGE;
+	location.bit = SNAKE_ROW_BIT_SIZE*(pt.y % SNAKE_ROWS_PER_PAGE);
+	return location;
 }
 
 
@@ -145,7 +147,7 @@ byte is_wall(point_t pt) {
 	
 	// TODO: Check if the wall is actually a food?
 	// TODO: Return false if out of bounds
-	address_t loc = pt2buffer(pt);
+	address_t loc = pt2bufferaddress(pt);
 	byte object = GET(0x11, walls[loc.column][loc.page] >> loc.bit);
 	return object == WALL;
 }

@@ -42,7 +42,7 @@ void 		play_snake_game(void);
 void 		end_snake_game(snake_t* snake);
 direction_t update_direction(direction_t current);
 void 		update_buffer(point_t pt, obj_t object);
-address_t 	pt2buffer(point_t pt);
+address_t 	pt2bufferaddress(point_t pt);
 byte 		is_wall(point_t pt);
 void 		clear_walls(void);
 bool		equal_pts(point_t pt1, point_t pt2);
@@ -83,7 +83,7 @@ void		write_score(uint8_t score);
 #define MAX_SNAKE_COLUMN 	(MAX_COLUMN/SNAKE_WIDTH)
 #define MAX_SNAKE_ROW		((MAX_ROW-TEXT_HEIGHT)/SNAKE_WIDTH)
 #define SNAKE_ROW_BIT_SIZE	(BIT_PER_BYTE/SNAKE_ROWS_PER_PAGE)
-#define MAX_SNAKE_PAGE		5  //(CEILING(MAX_SNAKE_ROW, SNAKE_ROWS_PER_PAGE)
+#define MAX_SNAKE_PAGE		4  //(CEILING(MAX_SNAKE_ROW, SNAKE_ROWS_PER_PAGE)
 #define MAX_SEED			(MAX_SNAKE_COLUMN*MAX_SNAKE_ROW)
 
 #define START_X				(MAX_SNAKE_COLUMN/2)

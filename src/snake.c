@@ -92,10 +92,10 @@ void increase_length(snake_t* snake) {
  *  returns: True, if the data is successfully pushed. (TODO).
  *
  */
-void push_head(snake_t* snake, point_t s_pos, direction_t dir) {
+void push_head(snake_t* snake, point_t pt, direction_t dir) {
 	node_t *n = malloc(sizeof(node_t));
 	assert(n != NULL);
-	n->pos = s_pos;
+	n->pos = pt;
 	n->length = 1;
 	n->dir = dir;
 	n->ptr = NULL;
@@ -145,7 +145,6 @@ point_t get_head_position(snake_t* snake) {
 point_t remove_from_tail(snake_t* snake) {
 	
 	(snake->length)--;	
-
 	if (snake->tail->length == 1) {
 		return pop_tail(snake);
 	} else {
@@ -243,6 +242,8 @@ point_t move_pos(point_t pos, direction_t dir, byte dist) {
 		case DOWN: 	pos.y += dist; break;
 		case LEFT: 	pos.x -= dist; break;
 		case RIGHT:	pos.x += dist; break;
+		case NONE:	break;
+		default: 	break;
 	}
 
 	//Handle reaching the edge of the screen
