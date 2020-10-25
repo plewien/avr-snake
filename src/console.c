@@ -76,7 +76,7 @@ ISR(TIMER1_OVF_vect) { //Timer ISR for low battery LED
  *
  */
 int main(void) {
-	initialise_game_console();
+ 	initialise_game_console();
 	check_free_ram();
 
 	//TODO: Initalise game menu screen
