@@ -29,8 +29,6 @@ extern void play_snake_game(void);
  *********************************/
 volatile direction_t selected_direction = NONE;
 volatile byte action_a_flag = FALSE;
-//
-
 
 
 /*********************************
@@ -79,7 +77,8 @@ ISR(TIMER1_OVF_vect) { //Timer ISR for low battery LED
  */
 int main(void) {
 	initialise_game_console();
-	
+	check_free_ram();
+
 	//TODO: Initalise game menu screen
 	while(TRUE) {
 		play_snake_game();
@@ -199,6 +198,12 @@ void srand_adc(void) {
 	while(WAIT_FOR_CONVERSION);
 	srand(ADCL);  // seed with low-byte of ADC
 	return;
+}
+
+int check_free_ram (void) {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 
 void display_game_over_screen(void) {

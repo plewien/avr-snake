@@ -55,6 +55,7 @@ byte bound_check(byte val, byte min, byte max);
 void display_game_over_screen();
 void LCD_clear();
 void srand_adc(void);
+int check_free_ram (void);
 
 
 

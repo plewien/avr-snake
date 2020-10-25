@@ -68,6 +68,7 @@ point_t		check_food_collision(snake_t* snake, point_t food);
 // Drawing function declarations
 byte 		write_display(point_t pt);
 address_t	pt2display(point_t pt);
+byte		create_image(obj_t object, uint8_t idx);
 void 		draw(point_t s_pos);
 void		draw_food(point_t pt);
 void 		clear(point_t s_pos);
@@ -88,7 +89,7 @@ void		write_score(uint8_t score);
 
 #define START_X				(MAX_SNAKE_COLUMN/2)
 #define START_Y				(MAX_SNAKE_ROW/2)
-#define START_LENGTH		5
+#define START_LENGTH		15
 #define LENGTH_DELTA		5
 
 /*** End of Snake Header File ****/

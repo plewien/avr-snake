@@ -50,26 +50,16 @@ byte write_display(point_t pt) {
 	}
 	
 	// transcribe to pixel data
-	byte i, j, shift;
+	byte i, j, shift, pixel_shift;
 	byte pixel_data[SNAKE_WIDTH] = {0x00};
-	byte wall_mask, pixel_mask;
+	byte image_segment;
 	for (i=0; i<2; i++) {
+		pixel_shift = i*SNAKE_WIDTH;
 		shift = (offset + i*SNAKE_ROW_BIT_SIZE);
-		wall_mask = 0b11 << shift;
-		pixel_mask = 0x0F << i*SNAKE_WIDTH;
+		obj_t obj = (GET(wall_data>>shift, 0b11));
 		for (j=0; j<SNAKE_WIDTH; j++) {
-			switch (GET(wall_data, wall_mask)>>shift) {
-				case EMPTY:
-					SET(pixel_data[j], pixel_mask, OFF);
-					break;
-				case WALL:
-					SET(pixel_data[j], pixel_mask, ON);
-					break;
-				case FOOD:
-					SET(pixel_data[j], pixel_mask, ON);
-				default:
-					break;
-			}
+			image_segment = create_image(obj, j);
+			SET(pixel_data[j], (image_segment<<pixel_shift), ON);
 		}
 	}
 
@@ -82,6 +72,19 @@ byte write_display(point_t pt) {
 	}
 	return(TRUE);
 }
+
+byte create_image(obj_t object, uint8_t idx) {
+	static const byte wall_image[] = {0xF, 0xF, 0xF, 0xF};
+	static const byte food_image[] = {0x6, 0x9, 0x9, 0x6};
+	static const byte empty_image[] = {0x0, 0x0, 0x0, 0x0};
+	switch (object) {
+		case WALL: return(wall_image[idx]);
+		case FOOD: return(food_image[idx]);
+		case EMPTY:
+		default: return(empty_image[idx]);
+	}
+}
+	
 
 /*
  * Function:  draw
@@ -122,6 +125,8 @@ void draw_food(point_t pt) {
 	// TODO: Implement in order to differentiate the food from the snake
 	// Trickier than it looks because if the snake passes above/below the food,
 	// then it will be erased (since it currently stored as a wall).
+	update_buffer(pt, FOOD);
+	write_display(pt);
 	return;
 }
 
@@ -152,14 +157,12 @@ void draw_minimap(void) {
 }
 
 void write_score(uint8_t score) {
+	lcd_moveto_xy(0,0);
+	lcd_put_int(check_free_ram());
 	lcd_moveto_xy(7,2);
 	lcd_putstr("score:");
 	lcd_moveto_xy(7,80);
 	lcd_put_uint(score);
 	return;
 }
-
-
-
-
 

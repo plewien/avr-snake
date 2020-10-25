@@ -20,7 +20,6 @@ DESCRIPTION:
 #include "snake.h"
 
 volatile byte walls[MAX_SNAKE_COLUMN][MAX_SNAKE_PAGE] = {{ OFF }};
-volatile snake_t* snake;
 extern direction_t selected_direction;
 
 
@@ -56,7 +55,7 @@ extern direction_t selected_direction;
 void play_snake_game() {
 	point_t tail, head = {.x = START_X, .y = START_Y};
 	direction_t direction = RIGHT;
-	snake = create_snake(head, direction);
+	snake_t* snake = create_snake(head, direction);
 	point_t food = generate_food();
 	
 	while (TRUE) {
@@ -72,7 +71,7 @@ void play_snake_game() {
 			tail = remove_from_tail(snake);
 			clear(tail);
 		}
-		draw_minimap();
+		//draw_minimap();
 
 		// Pause before drawing next pixel
 		_delay_ms(SPEED); 
@@ -201,7 +200,7 @@ point_t generate_food(void) {
 	do { food = generate_random_location(); } 
 	while(is_wall(food));
 
-	draw(food);
+	draw_food(food);
 	return food;
 }
 
