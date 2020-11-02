@@ -50,14 +50,11 @@ typedef enum {UP,DOWN,LEFT,RIGHT,NONE} direction_t;
 #define CEILING(X,Y) 			(((X) + (Y) - 1) / (Y))
 
 // Function declarations
-void initialise_game_console();
-byte bound_check(byte val, byte min, byte max);
-void display_game_over_screen();
-void LCD_clear();
-void srand_adc(void);
-int check_free_ram (void);
-
-
+void 	initialise_game_console();
+void 	display_game_over_screen();
+int 	check_free_ram (void);
+void 	LCD_clear();
+void 	srand_adc(void);
 
 /*ATMEGA16 Pins*/
 #define ADC_1v5_PIN		_BV(PA3)	

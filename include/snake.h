@@ -16,8 +16,8 @@ DESCRIPTION:
 
 // Struct declarations
 typedef struct {
-	byte x;
-	byte y;
+	int8_t x;
+	int8_t y;
 } point_t;
 
 typedef enum {EMPTY=0b00,WALL=0b01,FOOD=0b10,SPECIAL=0b11} obj_t;
@@ -59,6 +59,7 @@ point_t 	pop_tail_tip(node_t* tail);
 void 		increase_length(snake_t* snake);
 void 		clear_snake(snake_t* snake);
 point_t 	move_pos(point_t pt, direction_t dir, byte dist);
+int8_t 		bound_check(int8_t val, uint8_t min, uint8_t max);
 
 // Food function declarations
 point_t		generate_food(void);

@@ -254,4 +254,23 @@ point_t move_pos(point_t pos, direction_t dir, byte dist) {
 }
 
 
+/*
+ * Function:  bound_check
+ * -----------------------
+ * Determines if a value is within a given range, specified by min and
+ * max. Used to wrap the screen if a value is off the edge.
+ *	
+ *	val: A given number, as a byte.
+ *	min: The minimum number for that value.
+ *	max: The maximum number for that value.
+ *
+ *	returns: The modulus of val that places it within range.
+ */
+int8_t bound_check(int8_t val, uint8_t min, uint8_t max) {
+	if (val < min)
+		return max - (min - val);
+	return val % max; 
+}
+
+
 

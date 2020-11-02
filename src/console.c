@@ -153,24 +153,6 @@ void init_spi_lcd() {
 
 
 /*
- * Function:  bound_check
- * -----------------------
- * Determines if a value is within a given range, specified by min and
- * max. Used to wrap the screen if a value is off the edge.
- *	
- *	val: A given number, as a byte.
- *	min: The minimum number for that value.
- *	max: The maximum number for that value.
- *
- *	returns: The modulus of val that places it within range.
- */
-byte bound_check(byte val, byte min, byte max) {
-	if (val == 0xFF || val < min) //First check is for if min=0
-		return max - 1;
-	return val % max; 
-}
-
-/*
  * Function:  LCD_clear
  * ---------------------
  * Sets all bits on screen to be OFF. Must also clear the screen buffer in
@@ -218,6 +200,7 @@ void display_game_over_screen(void) {
 		_delay_ms(100);
 	}
 	
+	action_a_flag = FALSE;
 	LCD_clear();
 	return;
 }
